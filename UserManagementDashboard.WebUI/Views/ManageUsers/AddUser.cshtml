@@ -1,0 +1,37 @@
+﻿@model UserManagementDashboard.Models.User
+
+@{
+    if (string.IsNullOrEmpty((string)ViewContext.RouteData.Values["id"]!))
+    {
+        ViewData["Title"] = "Add User";
+    }
+}
+
+<form method="post" asp-action="Add">
+    <div class="row">
+        <div class="col-md-6">
+            <label asp-for="FirstName" class="control-label"></label>
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+            <input asp-for="FirstName" class="form-control" />
+
+            <label asp-for="LastName" class="control-label"></label>
+            <span asp-validation-for="LastName" class="text-danger"></span>
+            <input asp-for="LastName" class="form-control" />
+
+            <label asp-for="Password" class="control-label"></label>
+            <span asp-validation-for="Password" class="text-danger"></span>
+            <input asp-for="Password" class="form-control" />
+
+@*             <label asp-for="" class="control-label"></label>
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+            <input asp-for="FirstName" class="form-control" /> *@
+
+            <input type="submit" value="Add" class="btn btn-primary vspace" />
+
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,47 @@
+﻿@model IEnumerable<UserManagementDashboard.Models.User>
+@{
+    ViewData["Title"] = "Manage Users";
+}
+<table class="table">
+    <tr>
+        <th></th>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FirstName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.LastName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Email)
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @*                 <a asp-action="AddOrUpdate" asp-route-id=@item.BookId class="btn btn-outline-primary">Update</a>
+            <a asp-controller="ManageBookAuthors" asp-action="Index" asp-route-id="@item.BookId" class="btn btn-outline-primary">Manage Book Authors</a>
+            <form method="post" asp-action="Remove">
+            <input type="hidden" name="BookId" value="@item.BookId" />
+            <input type="submit" value="Remove" class="btn btn-danger" onclick="return removeConfirmation();" />
+            </form> *@
+            </td>
+            <td>
+                @item.Id
+            </td>
+            <td>
+                @item.FirstName
+            </td>
+            <td>
+                @item.LastName
+            </td>
+            <td>
+                @item.Email
+            </td>
+        </tr>
+    }
+</table>
