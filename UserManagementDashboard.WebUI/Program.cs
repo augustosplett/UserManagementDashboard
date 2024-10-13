@@ -1,7 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using UserManagementDashboard.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+//get connection string from appsettings.json
+string cnString = builder.Configuration.GetConnectionString("DefaultCS")!;
+
+//dependency injection
+builder.Services.AddDbContext<UserManagementDashboardContext>(options =>
+{
+    options.UseSqlServer(cnString);
+});
 
 var app = builder.Build();
 
