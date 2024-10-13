@@ -5,9 +5,14 @@ using UserManagementDashboard.Models;
 
 namespace UserManagementDashboard.WebUI.Controllers;
 
-public class ManageUsersController(UserManagementDashboardContext context) : Controller
+public class ManageUsersController : Controller
 {
-    private readonly UserManagementDashboardContext _context = context;
+    private readonly UserManagementDashboardContext _context;
+
+    public ManageUsersController(UserManagementDashboardContext context)
+    {
+        _context = context;
+    }
 
     public async Task<IActionResult> ManageUsers()
     {
@@ -30,45 +35,33 @@ public class ManageUsersController(UserManagementDashboardContext context) : Con
         return View();
     }
 
-    public async Task<IActionResult> AddOrUpdate(int? id)
-    {
-        User? user = null;
-        try
-        {
-
-            if (id == null) return View();
-            user = await UsersData.GetUser((int)id, _context);
-            if (user == null)
-                return RedirectToAction("Index", "NotFound", new { entity = "User", backUrl = "/ManageUsers/" });
-        }
-        catch (Exception ex)
-        {
-            TempData["DangerMessage"] = ex.Message;
-        }
-        return View(user);
-    }
-
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddOrUpdate(User user)
+    public async Task<IActionResult> AddUser(User user, string confirmPassword)
     {
         if (!ModelState.IsValid)
         {
-            return (user.Id == 0) ? View() : View(user);
+            return View(user);
+        }
+
+        if (user.Password != confirmPassword)
+        {
+            ModelState.AddModelError("Password", "Passwords do not match");
+            return View(user);
         }
 
         try
         {
-            if (user.Id == 0)
-                await UsersData.Insert(user, _context);
-            else
-                await UsersData.Update(user, _context);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "User successfully added!";
         }
         catch (Exception ex)
         {
             TempData["DangerMessage"] = ex.Message;
-            return (user.Id == 0) ? View() : View(user);
+            return View(user);
         }
-        return RedirectToAction(nameof(Index));
+
+        return RedirectToAction("ManageUsers");
     }
 }
