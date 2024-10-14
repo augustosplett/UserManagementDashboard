@@ -38,43 +38,18 @@ public class ManageUsersController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> UpdateUserAsync(User user)
-    {
-        if (ModelState.IsValid)
-        {
-            var existingUser = await UsersData.GetUser(user.Id, _context);
-            if (existingUser != null)
-            {
-                existingUser.FirstName = user.FirstName;
-                existingUser.LastName = user.LastName;
-                existingUser.Email = user.Email;
-
-                if (!string.IsNullOrEmpty(user.Password))
-                {
-                    existingUser.Password = user.Password; 
-                }
-
-                _context.SaveChanges();
-            }
-
-            return RedirectToAction("ManageUsers");
-        }
-
-        ViewBag.Users = _context.Users.ToList();
-        return View("ManageUsers", user);
-    }
-
-    [HttpPost]
     public async Task<IActionResult> RemoveAsync(int id)
     {
         var user = await UsersData.GetUser(id, _context);
         if (user != null)
         {
-            _context.Users.Remove(user);
-            _context.SaveChanges();
+            await UsersData.Delete(user, _context);
         }
+
+        await LoadUsersAsync();
         return RedirectToAction("ManageUsers");
     }
+
 
 
     public IActionResult AddUser()
@@ -110,5 +85,70 @@ public class ManageUsersController : Controller
         }
 
         return RedirectToAction("ManageUsers");
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        ViewBag.Users = await UsersData.GetList(_context);
+    }
+
+    // Ação para atualizar informações pessoais
+    [HttpPost]
+    public async Task<IActionResult> UpdatePersonalInfo(User user)
+    {
+        //remove os campos que não devem ser validados por esse método
+        ModelState.Remove("Email");
+        ModelState.Remove("Password");
+
+        if (ModelState.IsValid)
+        {
+            var existingUser = await UsersData.GetUser(user.Id, _context);
+            if (existingUser != null)
+            {
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+
+                await UsersData.Update(existingUser, _context);
+            }
+
+            TempData["SuccessMessage"] = "Personal information updated successfully!";
+            return RedirectToAction("ManageUsers", new { id = user.Id });
+        }
+
+        TempData["DangerMessage"] = "Failed to update personal information!";
+        ViewBag.Users = await UsersData.GetList(_context);
+        return View("ManageUsers", user);
+    }
+
+    // Ação para atualizar informações de segurança (e-mail e senha)
+    [HttpPost]
+    public async Task<IActionResult> UpdateSecurityInfo(User user)
+    {
+        // Removendo os campos não relacionados ao formulário de segurança
+        ModelState.Remove("FirstName");
+        ModelState.Remove("LastName");
+
+        if (ModelState.IsValid)
+        {
+            var existingUser = await UsersData.GetUser(user.Id, _context);
+            if (existingUser != null)
+            {
+                existingUser.Email = user.Email;
+
+                if (!string.IsNullOrEmpty(user.Password))
+                {
+                    existingUser.Password = user.Password;
+                }
+
+                await UsersData.Update(existingUser, _context);
+            }
+
+            TempData["SuccessMessage"] = "Security information updated successfully!";
+            return RedirectToAction("ManageUsers", new { id = user.Id });
+        }
+
+        TempData["DangerMessage"] = "Failed to update security information!";
+        ViewBag.Users = await UsersData.GetList(_context);
+        return View("ManageUsers", user);
     }
 }

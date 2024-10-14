@@ -18,12 +18,11 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Select</th>
+            <th></th>
             <th>Id</th>
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -31,28 +30,30 @@
     {
         <tr>
             <td>
-                <a class="btn btn-primary" asp-action="ManageUsers" asp-route-id="@user.Id">Select</a>
+                <a asp-action="ManageUsers" asp-route-id="@user.Id">Select</a>
             </td>
             <td>@user.Id</td>
             <td>@user.FirstName</td>
             <td>@user.LastName</td>
             <td>@user.Email</td>
-            <td>
-                <form asp-action="Remove" asp-route-id="@user.Id" method="post" onsubmit="return confirm('Do you confirm this deletion?');">
-                    <input type="submit" class="btn btn-danger" value="Remove" />
-                </form>
-            </td>
+   
         </tr>
     }
     </tbody>
 </table>
-
-<!-- Formulário de edição de usuário -->
+<!-- Formulário de deleção de usuário -->
 @if (Model != null)
 {
-    <h2>Edit User</h2>
-
-    <form asp-action="UpdateUser" method="post">
+    <form asp-action="Remove" method="post" onsubmit="return confirm('Do you confirm this deletion?');">
+        <input asp-for="Id" type="hidden" />
+        <input type="submit" class="btn btn-danger" value="Remove" />
+    </form>
+}
+<!-- Formulário de edição de dados pessoais -->
+@if (Model != null)
+{
+    <h3>Personal Section</h3>
+    <form asp-action="UpdatePersonalInfo" method="post">
         <input type="hidden" asp-for="Id" />
 
         <div class="form-group">
@@ -66,6 +67,16 @@
             <input asp-for="LastName" class="form-control" />
             <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
+        <button type="submit" class="btn btn-primary">Update Personal Info</button>
+    </form>
+}
+
+<!-- Formulário de edição de dados de segurança -->
+@if (Model != null)
+{
+    <h3>Security Section</h3>
+    <form asp-action="UpdateSecurityInfo" method="post">
+        <input type="hidden" asp-for="Id" />
 
         <div class="form-group">
             <label asp-for="Email"></label>
@@ -79,18 +90,8 @@
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
 
-@*         <div class="form-group">
-            <label asp-for="ConfirmPassword"></label>
-            <input asp-for="ConfirmPassword" class="form-control" type="password" />
-            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-        </div> *@
-
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit" class="btn btn-primary">Update Security Info</button>
     </form>
-}
-else
-{
-    <p>Select a user to edit.</p>
 }
 
 @section Scripts {
