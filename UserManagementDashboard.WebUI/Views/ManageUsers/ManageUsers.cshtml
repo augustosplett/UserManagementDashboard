@@ -1,47 +1,98 @@
-﻿@model IEnumerable<UserManagementDashboard.Models.User>
-@{
-    ViewData["Title"] = "Manage Users";
-}
-<table class="table">
-    <tr>
-        <th></th>
-        <th>
-            @Html.DisplayNameFor(model => model.Id)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.LastName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Email)
-        </th>
-    </tr>
+﻿@model UserManagementDashboard.Models.User
 
-    @foreach (var item in Model)
+@{
+    ViewBag.Title = "Manage Users";
+}
+
+<h1>Manage Users</h1>
+
+<!-- Exibir a mensagem de erro, se houver -->
+@if (TempData["DangerMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["DangerMessage"]
+    </div>
+}
+
+<!-- Tabela de usuários -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Select</th>
+            <th>Id</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in ViewBag.Users)
     {
         <tr>
             <td>
-                @*                 <a asp-action="AddOrUpdate" asp-route-id=@item.BookId class="btn btn-outline-primary">Update</a>
-            <a asp-controller="ManageBookAuthors" asp-action="Index" asp-route-id="@item.BookId" class="btn btn-outline-primary">Manage Book Authors</a>
-            <form method="post" asp-action="Remove">
-            <input type="hidden" name="BookId" value="@item.BookId" />
-            <input type="submit" value="Remove" class="btn btn-danger" onclick="return removeConfirmation();" />
-            </form> *@
+                <a class="btn btn-primary" asp-action="ManageUsers" asp-route-id="@user.Id">Select</a>
             </td>
+            <td>@user.Id</td>
+            <td>@user.FirstName</td>
+            <td>@user.LastName</td>
+            <td>@user.Email</td>
             <td>
-                @item.Id
-            </td>
-            <td>
-                @item.FirstName
-            </td>
-            <td>
-                @item.LastName
-            </td>
-            <td>
-                @item.Email
+                <form asp-action="Remove" asp-route-id="@user.Id" method="post" onsubmit="return confirm('Do you confirm this deletion?');">
+                    <input type="submit" class="btn btn-danger" value="Remove" />
+                </form>
             </td>
         </tr>
     }
+    </tbody>
 </table>
+
+<!-- Formulário de edição de usuário -->
+@if (Model != null)
+{
+    <h2>Edit User</h2>
+
+    <form asp-action="UpdateUser" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="LastName"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" type="password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+@*         <div class="form-group">
+            <label asp-for="ConfirmPassword"></label>
+            <input asp-for="ConfirmPassword" class="form-control" type="password" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div> *@
+
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+}
+else
+{
+    <p>Select a user to edit.</p>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

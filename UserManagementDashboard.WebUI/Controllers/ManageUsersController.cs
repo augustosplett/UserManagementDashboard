@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using UserManagementDashboard.Data;
 using UserManagementDashboard.Models;
 
@@ -14,21 +13,69 @@ public class ManageUsersController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> ManageUsers()
+    public async Task<IActionResult> ManageUsers(int? id)
     {
-        var listOfUsers = new List<User>();
-   
+        var listOfUsers = new List<User>(); 
+        User selectedUser = null;
+
         try
         {
             listOfUsers = await UsersData.GetList(_context);
+
+            if (id.HasValue)
+            {
+                selectedUser = await UsersData.GetUser(id.Value, _context);
+            }
         }
         catch (Exception ex)
         {
             TempData["DangerMessage"] = ex.Message;
         }
 
-        return View(listOfUsers);
+        ViewBag.Users = listOfUsers;
+
+        return View(selectedUser);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateUserAsync(User user)
+    {
+        if (ModelState.IsValid)
+        {
+            var existingUser = await UsersData.GetUser(user.Id, _context);
+            if (existingUser != null)
+            {
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.Email = user.Email;
+
+                if (!string.IsNullOrEmpty(user.Password))
+                {
+                    existingUser.Password = user.Password; 
+                }
+
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("ManageUsers");
+        }
+
+        ViewBag.Users = _context.Users.ToList();
+        return View("ManageUsers", user);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveAsync(int id)
+    {
+        var user = await UsersData.GetUser(id, _context);
+        if (user != null)
+        {
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+        }
+        return RedirectToAction("ManageUsers");
+    }
+
 
     public IActionResult AddUser()
     {
